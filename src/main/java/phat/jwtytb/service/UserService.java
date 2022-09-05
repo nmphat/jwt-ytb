@@ -12,5 +12,12 @@ public interface UserService {
     User getUserById(Long id);
     // User getUserByName(String name);
     User getUserByUsername(String username);
+
+    Role getRoleById(Long id);
+    Role getRoleByName(String name);
+
     List<User> getUsers();
+
+
+
 }

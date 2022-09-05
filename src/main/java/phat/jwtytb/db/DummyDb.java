@@ -20,14 +20,14 @@ public class DummyDb {
     private UserService userService;
 
     @Bean
-    CommandLineRunner initDummyDb(UserRepos userRepos, RoleRepos roleRepos) {
+    CommandLineRunner initDummyDb() {
         return args -> {
 
             // create dummy roles
             List<Role> roles = new ArrayList<>() {{
                 add(new Role(1L, "admin"));
-                add(new Role(2L, "user"));
-                add(new Role(3L, "manager"));
+                add(new Role(2L, "manager"));
+                add(new Role(3L, "user"));
             }};
 
             // save dummy roles
@@ -45,6 +45,27 @@ public class DummyDb {
             // save dummy users
             for (User user : users) {
                 userService.saveUser(user);
+            }
+
+            // 5 admins
+            for (int i = 0; i < 5; i++){
+                userService.allRoleToUser(
+                        users.get(i).getUsername(),
+                        "admin");
+            }
+
+            // 5 managers
+            for (int i = 5; i < 10; i++){
+                userService.allRoleToUser(
+                        users.get(i).getUsername(),
+                        "manager");
+            }
+
+            // 100 users
+            for (User user : users){
+                userService.allRoleToUser(
+                        user.getUsername(),
+                        "user");
             }
         };
     }
