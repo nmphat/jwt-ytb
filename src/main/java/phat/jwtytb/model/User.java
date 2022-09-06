@@ -30,6 +30,7 @@ public class User {
     @Column(name = "username", columnDefinition = "varchar(255)", nullable = false, unique = true, updatable = false)
     private String username;
 
+    @Column(name = "password")
     private String password;
 
     @ManyToMany(fetch = EAGER)

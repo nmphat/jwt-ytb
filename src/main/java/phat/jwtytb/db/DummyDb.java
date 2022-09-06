@@ -6,13 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import phat.jwtytb.model.Role;
 import phat.jwtytb.model.User;
-import phat.jwtytb.repos.RoleRepos;
-import phat.jwtytb.repos.UserRepos;
 import phat.jwtytb.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Configuration
 public class DummyDb {
@@ -48,24 +45,18 @@ public class DummyDb {
             }
 
             // 5 admins
-            for (int i = 0; i < 5; i++){
-                userService.allRoleToUser(
-                        users.get(i).getUsername(),
-                        "admin");
+            for (int i = 0; i < 5; i++) {
+                userService.allRoleToUser(users.get(i).getUsername(), "admin");
             }
 
             // 5 managers
-            for (int i = 5; i < 10; i++){
-                userService.allRoleToUser(
-                        users.get(i).getUsername(),
-                        "manager");
+            for (int i = 5; i < 10; i++) {
+                userService.allRoleToUser(users.get(i).getUsername(), "manager");
             }
 
             // 100 users
-            for (User user : users){
-                userService.allRoleToUser(
-                        user.getUsername(),
-                        "user");
+            for (User user : users) {
+                userService.allRoleToUser(user.getUsername(), "user");
             }
         };
     }
