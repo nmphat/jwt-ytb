@@ -42,12 +42,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(request -> new CorsConfiguration().setAllowedOriginPatterns(List.of("*"))).and().csrf().disable().authorizeRequests().antMatchers(HttpMethod.DELETE).hasAnyAuthority("admin").antMatchers("/api/v1/users/**").hasAnyAuthority("admin").antMatchers("/api/v1/user/**").hasAnyAuthority("user", "admin", "manager").antMatchers("/api/v1/login/**").permitAll().anyRequest().authenticated().and().httpBasic().authenticationEntryPoint(myBasicAuthenticationEntryPoint).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        http.apply(MyCustomDsl.customDsl());
-        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+        return http.cors()
+                .configurationSource(request -> new CorsConfiguration().setAllowedOriginPatterns(List.of("*")))
+                .and()
+                .csrf()
+                .disable()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.DELETE)
+                .hasAnyAuthority("admin")
+                .antMatchers("/api/v1/users/**")
+                .hasAnyAuthority("admin")
+                .antMatchers("/api/v1/user/**")
+                .hasAnyAuthority("user", "admin", "manager")
+                .antMatchers("/api/v1/login/**", "/api/v1/jwt/refresh_token")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .httpBasic()
+                .authenticationEntryPoint(myBasicAuthenticationEntryPoint)
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .apply(MyCustomDsl.customDsl())
+                .and()
+                .addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean
@@ -57,7 +78,11 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class).userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder).and().build();
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(bCryptPasswordEncoder)
+                .and()
+                .build();
     }
 }
 

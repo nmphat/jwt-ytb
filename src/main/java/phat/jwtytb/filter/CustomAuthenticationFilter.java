@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import phat.jwtytb.model.ResponseObject;
 
@@ -50,9 +49,12 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         User user = (User) authentication.getPrincipal();
         log.info("User [{}] successful authentication", user);
         Algorithm algorithm = Algorithm.HMAC256(secret.getBytes());
-        String accessToken = JWT.create().withSubject(user.getUsername()).withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 60 * 1000)).withIssuer(request.getRequestURL().toString()).withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(";"))).sign(algorithm);
 
-        String refreshToken = JWT.create().withSubject(user.getUsername()).withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 60 * 1000)).withIssuer(request.getRequestURL().toString()).withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(";"))).sign(algorithm);
+        // 10 min for access token
+        String accessToken = JWT.create().withSubject(user.getUsername()).withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000)).withIssuer(request.getRequestURL().toString()).withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(";"))).sign(algorithm);
+
+        // 30 min for refresh token
+        String refreshToken = JWT.create().withSubject(user.getUsername()).withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000)).withIssuer(request.getRequestURL().toString()).withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(";"))).sign(algorithm);
 
         Map<String, String> tokens = new HashMap<>() {{
             put("access_token", accessToken);
@@ -63,8 +65,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
         new ObjectMapper()
                 .writeValue(
-                        response.getOutputStream(),
-                        new ResponseObject("ok", "authenticate successfully", tokens));
+                        response.getOutputStream(), new ResponseObject("ok", "authenticate successfully", tokens));
     }
 
     @Override

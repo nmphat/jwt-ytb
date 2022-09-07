@@ -3,10 +3,8 @@ package phat.jwtytb.filter;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.java.Log;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +18,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -29,7 +29,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.warn("doFilterInternal");
-        if (request.getServletPath().equals("/api/v1/login")) {
+        if (request.getServletPath().equals("/api/v1/login") || request.getServletPath()
+                .equals("/api/v1/jwt/refresh_token")) {
             filterChain.doFilter(request, response);
         } else {
             String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -48,8 +49,10 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                         authorities.add(new SimpleGrantedAuthority(role));
                     });
 
-                    UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
@@ -62,10 +65,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.setContentType(APPLICATION_JSON_VALUE);
 
-                    new ObjectMapper()
-                            .writeValue(
-                                    response.getOutputStream(),
-                                    new ResponseObject("forbidden", "not authorization", e));
+                    new ObjectMapper().writeValue(response.getOutputStream(),
+                            new ResponseObject("Forbidden", e.getMessage(), e));
                 }
             } else {
                 filterChain.doFilter(request, response);
